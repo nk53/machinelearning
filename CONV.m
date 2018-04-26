@@ -1,7 +1,10 @@
-function conv_filt = CONV(x,w)
+function conv_filt = CONV(x,filt_spec)
 % x is row of original data (1,3072 uint8)
 % w is weight vector, b is bias
-x_color_square = reshape(x,[32,32,3]);
+% filt_spec - [w,f,p,s]
+
+x_color_square = reshape(x,[32,32,3]); % THIS ARRANGES BY COLUMNS INSTEAD OF ROWS!!
+x_color_square = permute(x_color_square,[2,1,3]); % this should fix it
 
 filt_size = 4; % allows 8 full sweeps
 stride = 2; % skip
