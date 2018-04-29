@@ -1,16 +1,12 @@
-function [weights,output_weights] = train_conv_nn(X,y,weights,output_weights)
+function prediction = test_conv_nn(X,weights,output_weights)
 
 
 
 %% Parameters (eventually will be function arguments)
 conv_nodes = 10;
-output_nodes = 10;
+output_nodes = 2;
 eta = 0.00001;
 num_classes = 10; % will eventually be = output_nodes, after testing
-
-%% Vectorize y
-Y = zeros(num_classes,1);
-Y(y+1) = 1;
 
 %% Initialize weights
 % weights = randn(64+1,conv_nodes); % 8x8 conv output
@@ -26,7 +22,7 @@ filt_spec = [8,0,2];
 
 % NOTE - this is doing parameter sharing (weights shared by all layers)
 for i = 1:conv_nodes
-    [co,rec_cols] = CONV(x_color_square,weights(:,i),filt_spec);
+    [co,~] = CONV(x_color_square,weights(:,i),filt_spec);
     
     %% RELU
     co(co < 0) = 0;
@@ -40,29 +36,5 @@ for i = 1:conv_nodes
 end
 
 activations = 1 ./ (1 + exp(-conv_vector * output_weights));
-
-%% START BACKPROP
-% output nodes
-delta_output = zeros(output_nodes,1);
-for i = 1:output_nodes
-    delta_j = (activations(i) - Y(i)) * activations(i) * (1 - activations(i));
-    output_weights(:,i) = output_weights(:,i) - eta * conv_vector.' * delta_j;
-    delta_output(i) = delta_j;
-end
-
-% conv nodes
-delta_j = sum(output_weights .* delta_output.',2) .* (conv_vector > 0).';
-delta_j = reshape(delta_j,[169,conv_nodes]);
-
-
-weight_updates = weights * 0;
-for j = 1:3 % 3 is the depth dimension
-    for i = 1:conv_nodes
-        weight_updates(:,i) = weight_updates(:,i) + sum(delta_j(:,i) .* rec_cols(:,:,j)).';
-    end
-end
-
-weight_updates = weight_updates/3; % 3 is the depth dimension
-weights = weights - eta * weight_updates;
-
-
+[~,prediction] = max(activations);
+prediction = prediction - 1;
